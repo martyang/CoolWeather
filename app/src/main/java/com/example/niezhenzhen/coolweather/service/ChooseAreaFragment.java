@@ -39,15 +39,17 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
     RecyclerView cityRecy;
     Button otherCityBtn;
     Button hotCityBtn;
+    View provinceFragment;
+    View chooseCity;
     ArrayList<String> hostCitys = new ArrayList<>();
     String[] cityArr = {"北京","上海","广州","深圳","武汉","长沙","成都","重庆","大连","哈尔滨","杭州","济南","昆明","合肥","青岛","三亚","天津","西安","郑州","厦门","香港"};
     ArrayList<String> provinces = new ArrayList<>();
+    String[] provinceArr = {"北京","上海","广州","深圳","武汉","长沙","成都","重庆","大连","哈尔滨","杭州","济南","昆明","合肥"};
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View chooseCity = inflater.inflate(R.layout.choose_fram,null);
-
+        chooseCity = inflater.inflate(R.layout.choose_fram,null);
         if(hostCitys.isEmpty()){
             getList(cityArr);
         }
@@ -55,7 +57,9 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
         cityRecy = (RecyclerView) chooseCity.findViewById(R.id.city_content);
         otherCityBtn = (Button) chooseCity.findViewById(R.id.other_city);
         hotCityBtn = (Button) chooseCity.findViewById(R.id.hot_city);
+        provinceFragment = chooseCity.findViewById(R.id.province_frame);
 
+        otherCityBtn.setOnClickListener(this);
         cityRecy.setLayoutManager(new GridLayoutManager(getActivity(),3));
         cityRecy.setAdapter(new CityAdapter());
         return chooseCity;
@@ -72,8 +76,13 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.other_city:
-                provinceList.setVisibility(View.VISIBLE);
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(),R.layout.city_item,provinces);
+                provinceFragment.setVisibility(View.VISIBLE);
+                if(provinces.isEmpty()){
+                    for (String str:provinceArr) {
+                        provinces.add(str);
+                    }
+                }
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,provinces);
                 provinceList.setAdapter(arrayAdapter);
                 break;
             case R.id.hot_city:
@@ -91,7 +100,10 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                if(response.isSuccessful()){
+                    GsonUtil gsonUtil = new GsonUtil();
+                    gsonUtil.parseJsonToProvince(response.message());
+                }
             }
         });
     }
