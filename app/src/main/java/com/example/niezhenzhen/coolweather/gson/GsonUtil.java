@@ -42,7 +42,7 @@ public class GsonUtil {
     }
 
     /**
-     * 解析市级数据
+     * 解析市级数据,并保存到数据库
      * @param jsonData 返回的Json数据
      * @param provinceID 市对应的省的id
      * @return 保存成功返回true，否则返回false
