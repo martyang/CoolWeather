@@ -41,7 +41,6 @@ import okhttp3.Response;
 public class ChooseAreaFragment extends Fragment implements View.OnClickListener {
 
     private GsonUtil mGsonUtil;
-    private String chinaUrl = "http://guolin.tech/api/china";
     ListView provinceListView;
     RecyclerView cityRecy;
     Button otherCityBtn;
@@ -105,7 +104,7 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
      * 从网络下省数据
      */
     private void getProvinceDataFromNet(){
-        HttpUtil.sendHttpRequest(chinaUrl, new Callback() {
+        HttpUtil.sendHttpRequest(G.chinaUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 getActivity().runOnUiThread(new Runnable() {
@@ -148,6 +147,10 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
             }
         }
         return true;
+    }
+
+    private void getCityFromNet(){
+
     }
 
     /**
