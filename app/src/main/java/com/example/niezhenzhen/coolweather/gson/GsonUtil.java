@@ -5,6 +5,8 @@ import android.text.TextUtils;
 import com.example.niezhenzhen.coolweather.db.City;
 import com.example.niezhenzhen.coolweather.db.Country;
 import com.example.niezhenzhen.coolweather.db.Province;
+import com.example.niezhenzhen.coolweather.weather.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +33,8 @@ public class GsonUtil {
                     Province province = new Province();
                     province.setProvinceName(provinceObject.getString("name"));
                     province.setProvinceCode(provinceObject.getInt("id"));
-                    province.save();
+                    //数据库没有的才保存，防止重复
+                    province.saveIfNotExist("provinceCode = ?",province.getProvinceCode()+"");
                 }
                 return true;
             } catch (JSONException e) {
@@ -50,6 +53,7 @@ public class GsonUtil {
     public boolean parseJsonToCity(String jsonData,int provinceID){
         if(!TextUtils.isEmpty(jsonData)){
             try {
+//                List<City> list;
                 JSONArray allCitys = new JSONArray(jsonData);
                 for(int i=0;i<allCitys.length();i++){
                     JSONObject cityObject = allCitys.getJSONObject(i);
@@ -57,7 +61,11 @@ public class GsonUtil {
                     city.setProvinceId(provinceID);
                     city.setCityName(cityObject.getString("name"));
                     city.setCityCode(cityObject.getInt("id"));
-                    city.save();
+//                    list = DataSupport.where("cityCode = ?",city.getCityCode()+"").find(City.class);
+//                    if(list.isEmpty()){
+//                        city.save();
+//                    }
+                    city.saveIfNotExist("cityCode = ?",city.getCityCode()+"");
                 }
                 return true;
             } catch (JSONException e) {
@@ -76,14 +84,15 @@ public class GsonUtil {
     public boolean parseJsonToCountry(String jsonData,int cityID){
         if(!TextUtils.isEmpty(jsonData)){
             try {
+//                List<Country> list;
                 JSONArray allCountrys = new JSONArray(jsonData);
                 for(int i=0;i<allCountrys.length();i++){
                     JSONObject countryObject = allCountrys.getJSONObject(i);
                     Country country = new Country();
                     country.setCountryName(countryObject.getString("name"));
                     country.setCityId(cityID);
-                    country.setWeatherId(countryObject.getInt("weather_id"));
-                    country.save();
+                    country.setWeatherId(countryObject.getString("weather_id"));
+                    country.saveIfNotExist("countryName = ?",country.getCountryName());
                 }
                 return true;
             } catch (JSONException e) {
@@ -91,5 +100,17 @@ public class GsonUtil {
             }
         }
         return false;
+    }
+
+    public Weather parseWeather(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.get(0).toString();
+            return new Gson().fromJson(weatherContent,Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
