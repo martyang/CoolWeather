@@ -159,6 +159,9 @@ public class WeatherFragment extends Fragment {
             G.log(aqi + " " + pm25);
             aqi_number.setText(weather.aqi.city.aqi);
             pm25_number.setText(weather.aqi.city.pm25);
+        }else {
+            aqi_number.setText("-");
+            pm25_number.setText("-");
         }
         String comfortText = "舒适度：" + weather.suggestion.comfort.info;
         String washCarText = "洗车指数：" + weather.suggestion.washCar.info;
@@ -258,6 +261,7 @@ public class WeatherFragment extends Fragment {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             requestWeather(showCountry.get(position).getWeatherId());
+                            popupWindow.dismiss();
                         }
                     });
                     display.getSize(point);
