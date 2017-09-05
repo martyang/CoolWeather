@@ -11,7 +11,16 @@ public class Country extends DataSupport{
     private int id;
     private int cityId;
     private String countryName;
-    private int weatherId;
+    private String weatherId;
+    private String selected;
+
+    public String getSelected() {
+        return selected;
+    }
+
+    public void setSelected(String selected) {
+        this.selected = selected;
+    }
 
     public int getId() {
         return id;
@@ -37,11 +46,11 @@ public class Country extends DataSupport{
         this.countryName = countryName;
     }
 
-    public int getWeatherId() {
+    public String getWeatherId() {
         return weatherId;
     }
 
-    public void setWeatherId(int weatherId) {
+    public void setWeatherId(String weatherId) {
         this.weatherId = weatherId;
     }
 }
