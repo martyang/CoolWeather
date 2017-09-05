@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -75,7 +76,8 @@ public class WeatherFragment extends Fragment {
         sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         showCountry = DataSupport.where("selected = ?", G.SELECTE).find(Country.class);
         if (!showCountry.isEmpty()) {
-            G.log("收藏城市个数："+showCountry.size());
+            G.log("收藏城市个数：" + showCountry.size());
+            select_country_name.clear();
             for (Country c : showCountry) {
                 select_country_name.add(c.getCountryName());
             }
@@ -83,8 +85,14 @@ public class WeatherFragment extends Fragment {
             String weatherStr = sp.getString(G.WEATHER_KEY, null);
             if (weatherStr != null) {
                 GsonUtil gsonUtil = new GsonUtil();
-                Weather weather = gsonUtil.parseWeather(weatherStr);
-                showWeather(weather);
+                final Weather weather = gsonUtil.parseWeather(weatherStr);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showWeather(weather);
+                    }
+                });
+
             } else {
                 requestWeather(show_country.getWeatherId());
             }
@@ -111,13 +119,19 @@ public class WeatherFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
                 GsonUtil gsonUtil = new GsonUtil();
-                Weather weather = gsonUtil.parseWeather(responseText);
+                final Weather weather = gsonUtil.parseWeather(responseText);
                 if (weather != null && "ok".equals(weather.status)) {
                     closeProgress();
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString(G.WEATHER_KEY, responseText);
                     editor.apply();
-                    showWeather(weather);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showWeather(weather);
+                        }
+                    });
+
                 } else {
                     Toast.makeText(getContext(), "获取天气信息失败，请检查网络", Toast.LENGTH_SHORT).show();
                 }
@@ -128,28 +142,40 @@ public class WeatherFragment extends Fragment {
     private void showWeather(Weather weather) {
         String cityName = weather.basic.cityName;
         String uptateTime = weather.basic.update.updateTime.split(" ")[1];
-        String temp = weather.now.temperature+"℃";
+        String temp = weather.now.temperature + "℃";
         String weatherInfo = weather.now.more.info;
+        G.log(cityName);
+        G.log(uptateTime);
+        G.log(temp);
+        G.log(weatherInfo);
         current_city.setText(cityName);
         update_time.setText(uptateTime);
         sun_text.setText(weatherInfo);
         G.log("当前温度：" + weather.now.temperature);
         current_temp.setText(temp);
-        aqi_number.setText(weather.aqi.city.aqi);
-        pm25_number.setText(weather.aqi.city.pm25);
-        comfort_text.setText("舒适度："+weather.suggestion.comfort.info);
-        car_wash_text.setText("洗车指数："+weather.suggestion.washCar.info);
-        sport_text.setText("运动指数："+weather.suggestion.sport.info);
+        if (weather.aqi != null) {
+            String aqi = weather.aqi.city.aqi;
+            String pm25 = weather.aqi.city.pm25;
+            G.log(aqi + " " + pm25);
+            aqi_number.setText(weather.aqi.city.aqi);
+            pm25_number.setText(weather.aqi.city.pm25);
+        }
+        String comfortText = "舒适度：" + weather.suggestion.comfort.info;
+        String washCarText = "洗车指数：" + weather.suggestion.washCar.info;
+        String sportText = "运动指数：" + weather.suggestion.sport.info;
+        comfort_text.setText(comfortText);
+        car_wash_text.setText(washCarText);
+        sport_text.setText(sportText);
         weatherList = weather.forecastList;
         G.log("未来天气预报数：" + weatherList.size());
         future_weather_list.setAdapter(new MyListAdapter(getContext(), R.layout.weather_item_layout, weatherList));
     }
 
-    public class MyListAdapter extends ArrayAdapter<Forecast> {
+    class MyListAdapter extends ArrayAdapter<Forecast> {
 
         private int rescourceId;
 
-        public MyListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Forecast> objects) {
+        MyListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<Forecast> objects) {
             super(context, resource, objects);
             rescourceId = resource;
         }
@@ -220,15 +246,22 @@ public class WeatherFragment extends Fragment {
             WindowManager windowManager = getActivity().getWindowManager();
             Display display = windowManager.getDefaultDisplay();
             Point point = new Point();
+
             @Override
             public void onClick(View v) {
                 if (!select_country_name.isEmpty()) {
                     View moreView = getActivity().getLayoutInflater().inflate(R.layout.more_layout, null);
                     ListView more_country = (ListView) moreView.findViewById(R.id.more_country_list);
-                    more_country.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, select_country_name));
+                    more_country.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, select_country_name));
 
+                    more_country.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            requestWeather(showCountry.get(position).getWeatherId());
+                        }
+                    });
                     display.getSize(point);
-                    if(popupWindow ==null){
+                    if (popupWindow == null) {
                         popupWindow = new PopupWindow(moreView, point.x, 500);
                     }
                     popupWindow.showAsDropDown(v);
@@ -240,12 +273,13 @@ public class WeatherFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(backShowed){
+                if (backShowed) {
                     popupWindow.dismiss();
                     back.setVisibility(View.GONE);
                 }
             }
         });
+
     }
 
 
