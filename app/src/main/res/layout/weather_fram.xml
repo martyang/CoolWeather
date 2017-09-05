@@ -79,7 +79,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/weather_temp"
-                    android:text="29℃"
+                    android:text="- ℃"
                     android:textSize="60sp"
                     android:gravity="center"
                     android:textColor="@color/colorText"/>
@@ -129,7 +129,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/aqi_number"
-                        android:text="63"
+                        android:text="-"
                         android:textSize="30sp"
                         android:gravity="center"
                         android:textColor="@color/colorText"/>
@@ -152,7 +152,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/pm25_number"
-                        android:text="28"
+                        android:text="-"
                         android:textSize="30sp"
                         android:textColor="@color/colorText"
                         android:gravity="center"/>
