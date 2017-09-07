@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -34,6 +35,8 @@ import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Call;
@@ -82,8 +85,13 @@ public class WeatherFragment extends Fragment {
                 select_country_name.add(c.getCountryName());
             }
             show_country = showCountry.get(0);
+            String last_updateTime = sp.getString(G.UPDATETIME,null);
             String weatherStr = sp.getString(G.WEATHER_KEY, null);
-            if (weatherStr != null) {
+
+            //获取上次更新时间，如果距离上次更新大于3小时，则请求更新，否则加载存储的数据
+            if(weatherStr==null||Util.compireTime(last_updateTime)){
+                requestWeather(show_country.getWeatherId());
+            }else {
                 GsonUtil gsonUtil = new GsonUtil();
                 final Weather weather = gsonUtil.parseWeather(weatherStr);
                 getActivity().runOnUiThread(new Runnable() {
@@ -92,10 +100,8 @@ public class WeatherFragment extends Fragment {
                         showWeather(weather);
                     }
                 });
-
-            } else {
-                requestWeather(show_country.getWeatherId());
             }
+
         }
         return view;
     }
@@ -110,7 +116,7 @@ public class WeatherFragment extends Fragment {
                     @Override
                     public void run() {
                         closeProgress();
-                        Toast.makeText(getContext(), "获取天气信息失败，请检查网络", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "更新天气信息失败，请检查网络", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -124,6 +130,7 @@ public class WeatherFragment extends Fragment {
                     closeProgress();
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString(G.WEATHER_KEY, responseText);
+                    editor.putString(G.UPDATETIME,weather.basic.update.updateTime);
                     editor.apply();
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -133,7 +140,7 @@ public class WeatherFragment extends Fragment {
                     });
 
                 } else {
-                    Toast.makeText(getContext(), "获取天气信息失败，请检查网络", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "更新天气信息失败，请检查网络", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -145,7 +152,7 @@ public class WeatherFragment extends Fragment {
         String temp = weather.now.temperature + "℃";
         String weatherInfo = weather.now.more.info;
         G.log(cityName);
-        G.log(uptateTime);
+        G.log(weather.basic.update.updateTime);
         G.log(temp);
         G.log(weatherInfo);
         current_city.setText(cityName);
@@ -262,6 +269,8 @@ public class WeatherFragment extends Fragment {
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             requestWeather(showCountry.get(position).getWeatherId());
                             popupWindow.dismiss();
+                            back.setVisibility(View.GONE);
+                            backShowed = false;
                         }
                     });
                     display.getSize(point);
@@ -280,11 +289,20 @@ public class WeatherFragment extends Fragment {
                 if (backShowed) {
                     popupWindow.dismiss();
                     back.setVisibility(View.GONE);
+                    backShowed = false;
                 }
             }
         });
 
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(backShowed){
+            popupWindow.dismiss();
+            back.setVisibility(View.GONE);
+            backShowed = false;
+        }
+    }
 }
