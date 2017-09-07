@@ -2,6 +2,7 @@ package com.example.niezhenzhen.coolweather.service;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -60,6 +61,8 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
     List<Country> selectedCity = new ArrayList<>();
     FragmentManager fragmentManager;
     ProgressDialog progressDialog;
+    /*是否更新城市数据到数据库*/
+    boolean hasUpdate;
     /*当前位于哪一层显示*/
     int layer = G.MAIN_LAYER;
     /*省是否可见的标志位*/
@@ -91,9 +94,11 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
             //收藏的城市为空则加载热门城市
             getHotCity(cityArr);
             initHotCity();
+            layer = G.HOTCITY_LAYER;
         } else {
             G.log("获取收藏城市");
             getSelectedData();
+            layer = G.MAIN_LAYER;
         }
         provinceListView = (ListView) chooseCity.findViewById(R.id.province_list);
         cityRecy = (RecyclerView) chooseCity.findViewById(R.id.city_content);
@@ -117,11 +122,10 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //当前省id，用于后续的查询
                 provinceId = provinceList.get(position).getProvinceCode();
+                G.log("显示" + provinceList.get(position).getProvinceName() + "省的城市信息");
                 getCityFromDB(provinceId);
                 //更新城市数据
-                G.log("显示" + provinceList.get(position).getProvinceName() + "省的城市信息");
 //              cityRecy.setLayoutManager(gridLayoutManager);
-                mCityAdapter.notifyDataSetChanged();
                 layer = G.CITY_LAYER;
             }
         });
@@ -195,6 +199,7 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
             case R.id.other_city:
                 if (!provinceIsVisiable) {
                     readProvinceFromDB();
+                    layer = G.PROVINCE_LAYER;
                 }
                 break;
             case R.id.hot_city:
@@ -407,7 +412,7 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
                     getCountryFromDB(cityId);
                     layer = G.COUNTRY_LAYER;
 
-                } else {
+                } else if(layer == G.COUNTRY_LAYER){
                     //可获取天气的城市点击处理
                     G.log("选择" + countryList.get(position).getCountryName());
                     Country sc = countryList.get(position);
@@ -419,6 +424,8 @@ public class ChooseAreaFragment extends Fragment implements OnClickListener {
                         goBackMain(getSelectedData());
                         layer = G.MAIN_LAYER;
                     }
+                }else if(layer == G.HOTCITY_LAYER){
+                    G.log("点击热门城市");
                 }
             }
         }
