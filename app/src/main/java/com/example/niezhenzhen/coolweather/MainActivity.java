@@ -1,24 +1,19 @@
 package com.example.niezhenzhen.coolweather;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.audiofx.EnvironmentalReverb;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-import com.example.niezhenzhen.coolweather.service.AutoUpdate;
 import com.example.niezhenzhen.coolweather.service.ChooseAreaFragment;
 import com.example.niezhenzhen.coolweather.service.G;
 import com.example.niezhenzhen.coolweather.service.SettingFragment;
@@ -26,8 +21,6 @@ import com.example.niezhenzhen.coolweather.service.SuggestionFragment;
 import com.example.niezhenzhen.coolweather.service.WeatherFragment;
 
 import org.litepal.tablemanager.Connector;
-
-import java.util.Properties;
 
 /**
  * 注意：在使用FragmentTabhost时必须使用@android：id固定的id，包括tabhost,tabcotent,tabs三个id
@@ -55,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements TabHost.OnTabChan
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET},100);
         }
-//        G.log("启动更新服务");
-//        startService(new Intent(MainActivity.this, AutoUpdate.class));
     }
 
     /**
@@ -89,11 +80,5 @@ public class MainActivity extends AppCompatActivity implements TabHost.OnTabChan
     @Override
     public void onTabChanged(String tabId) {
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopService(new Intent(MainActivity.this, AutoUpdate.class));
     }
 }
