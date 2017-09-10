@@ -6,31 +6,29 @@
     android:layout_height="match_parent"
     tools:context="com.example.niezhenzhen.coolweather.MainActivity">
 
-   <android.support.v4.app.FragmentTabHost
-       android:id="@android:id/tabhost"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+    <android.support.v4.app.FragmentTabHost
+        android:id="@android:id/tabhost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <FrameLayout
+                android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:id="@android:id/tabcontent"/>
-           
-           <TabWidget
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:id="@android:id/tabs"
-               android:background="#87c9c4"
-               />
+                android:layout_weight="1"/>
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#87c9c4" />
 
-       </LinearLayout>
+        </LinearLayout>
 
-   </android.support.v4.app.FragmentTabHost>
+    </android.support.v4.app.FragmentTabHost>
 
 </android.support.constraint.ConstraintLayout>
