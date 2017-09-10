@@ -1,5 +1,10 @@
 package com.example.niezhenzhen.coolweather.gson;
 
+import com.example.niezhenzhen.coolweather.db.Province;
+import com.example.niezhenzhen.coolweather.service.G;
+
+import java.util.List;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -19,5 +24,10 @@ public class HttpUtil {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(address).build();
         client.newCall(request).enqueue(callback);
+    }
+
+    public static void sendCityRequest(List<Province> provinces,okhttp3.Callback callback){
+        String addres = G.chinaUrl+"/"+provinces.get(0).getProvinceCode();
+        sendHttpRequest(addres,callback);
     }
 }
